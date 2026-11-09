@@ -44,7 +44,7 @@ export const QUESTIONS: Question[] = [
     emoji: "🍊",
     description: "Fruta cítrica pequena, de casca fina que sai fácil com a mão, dividida em gomos.",
     variants: [
-      { term: "tangerina", where: ["NE", "RJ"], common: true },
+      { term: "tangerina", where: ["NE", "N", "RJ"], common: true },
       { term: "mexerica", where: ["SP", "MG", "GO"] },
       { term: "bergamota", where: ["RS"] },
       { term: "mimosa" },
@@ -74,7 +74,7 @@ export const QUESTIONS: Question[] = [
       "Doce cremoso e amarelo feito de milho verde ralado, cozido com leite e açúcar, servido frio com canela por cima.",
     variants: [
       { term: "curau", where: ["SE", "CO"] },
-      { term: "canjica", where: ["NE"] },
+      { term: "canjica", where: ["NE", "N"] },
       { term: "papa de milho" },
       { term: "corá" },
     ],
@@ -87,7 +87,7 @@ export const QUESTIONS: Question[] = [
       "Doce de grãos inteiros de milho branco cozidos no leite com açúcar, às vezes com coco ou amendoim. Comum nas festas juninas.",
     variants: [
       { term: "canjica", where: ["SE", "S"] },
-      { term: "mungunzá", where: ["NE"] },
+      { term: "mungunzá", where: ["NE", "N"] },
       { term: "chá de burro" },
     ],
   },
@@ -97,7 +97,7 @@ export const QUESTIONS: Question[] = [
     emoji: "🍪",
     description: "Doce industrializado, seco e crocante, vendido em pacotes. Pode ser recheado, de maisena, de chocolate…",
     variants: [
-      { term: "biscoito", where: ["RJ", "NE"] },
+      { term: "biscoito", where: ["RJ", "NE", "N"] },
       { term: "bolacha", where: ["SP", "S"] },
     ],
   },
@@ -118,7 +118,7 @@ export const QUESTIONS: Question[] = [
     description: "Legume grande de casca dura e polpa alaranjada, usado em doces, sopas e no quibebe.",
     variants: [
       { term: "abóbora", common: true },
-      { term: "jerimum", where: ["NE"] },
+      { term: "jerimum", where: ["NE", "N"] },
     ],
   },
   {
@@ -142,8 +142,10 @@ export const QUESTIONS: Question[] = [
     variants: [
       { term: "geladinho", where: ["SP"] },
       { term: "sacolé", where: ["RJ"] },
-      { term: "dindin", where: ["NE"] },
+      { term: "dindin", where: ["NE", "AM"] },
       { term: "chup-chup" },
+      { term: "chupa-chupa", where: ["MG"] },
+      { term: "chopp", where: ["PA"] },
       { term: "flau" },
       { term: "laranjinha" },
     ],
@@ -197,6 +199,17 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
+    id: "mosquito",
+    category: "cidade",
+    emoji: "🦟",
+    description: "Inseto pequeno de pernas compridas que zumbe no ouvido à noite e pica, deixando a pele coçando.",
+    variants: [
+      { term: "pernilongo", where: ["S", "SP", "RJ", "MG", "ES", "MS", "MT", "RO"] },
+      { term: "muriçoca", where: ["NE", "TO", "GO", "DF"] },
+      { term: "carapanã", where: ["AC", "AM", "RR", "PA", "AP"] },
+    ],
+  },
+  {
     id: "bicicleta",
     category: "cidade",
     emoji: "🚲",
@@ -234,6 +247,7 @@ export const QUESTIONS: Question[] = [
       { term: "pandorga", where: ["S"] },
       { term: "cafifa" },
       { term: "quadrado" },
+      { term: "curica", where: ["MA"] },
     ],
   },
   {
@@ -285,14 +299,14 @@ export const QUESTIONS: Question[] = [
       { term: "piá", where: ["PR", "SC"] },
       { term: "moleque" },
       { term: "pivete" },
-      { term: "curumim" },
+      { term: "curumim", where: ["N"] },
     ],
   },
 ];
 
 export const QUESTION_BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]));
 
-/** Normaliza um texto para busca ("São-Gonçalo " → "sao goncalo"). */
+/** Normaliza um texto para comparar ("Pão-de-sal " → "pao de sal"). */
 export function normalizeTerm(s: string): string {
   return s
     .normalize("NFD")
@@ -301,6 +315,12 @@ export function normalizeTerm(s: string): string {
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Se a palavra digitada for uma das variantes, devolve o termo canônico. */
+export function matchVariant(q: Question, text: string): string | null {
+  const n = normalizeTerm(text);
+  return q.variants.find((v) => normalizeTerm(v.term) === n)?.term ?? null;
 }
 
 export const ROUND_SIZE = 12;

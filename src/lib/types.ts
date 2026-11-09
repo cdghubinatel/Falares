@@ -1,10 +1,12 @@
-export type AnswerKind = "term" | "skip";
+export type AnswerKind = "term" | "other" | "skip";
 
 export interface Answer {
   questionId: string;
   kind: AnswerKind;
-  /** Variante escolhida; ausente quando a pessoa prefere não responder. */
+  /** Variante escolhida (ou reconhecida na palavra digitada); ausente quando a pessoa prefere não responder. */
   term?: string;
+  /** Palavra digitada em "Uso outra palavra". */
+  text?: string;
 }
 
 /** Votos validados: pergunta → termo → UF da infância → contagem. */

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CATEGORIES, type Question } from "../data/questions.ts";
+import { CATEGORIES, matchVariant, type Question } from "../data/questions.ts";
 import { nextQuestion, shuffle } from "../lib/round.ts";
 import type { Answer, Counts } from "../lib/types.ts";
 
@@ -23,6 +23,8 @@ export function Quiz({ size, counts, onFinish }: Props) {
   const [asked, setAsked] = useState<Asked[]>(() => [ask(nextQuestion([], [], counts))]);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const [otherOpen, setOtherOpen] = useState(false);
+  const [otherText, setOtherText] = useState("");
 
   const { question: q, options } = asked[index];
   const current = answers[q.id];
@@ -30,6 +32,8 @@ export function Quiz({ size, counts, onFinish }: Props) {
   function answer(a: Answer) {
     const next = { ...answers, [q.id]: a };
     setAnswers(next);
+    setOtherOpen(false);
+    setOtherText("");
     const inOrder = asked.map(({ question }) => next[question.id]).filter((x): x is Answer => !!x);
     if (index + 1 < asked.length) {
       setIndex(index + 1);
@@ -41,6 +45,13 @@ export function Quiz({ size, counts, onFinish }: Props) {
     } else {
       onFinish(inOrder);
     }
+  }
+
+  function submitOther(e: React.FormEvent) {
+    e.preventDefault();
+    const text = otherText.trim();
+    if (!text) return;
+    answer({ questionId: q.id, kind: "other", text, term: matchVariant(q, text) ?? undefined });
   }
 
   return (
@@ -76,6 +87,30 @@ export function Quiz({ size, counts, onFinish }: Props) {
       </div>
 
       <div className="options options--fixed">
+        {otherOpen ? (
+          <form className="other" onSubmit={submitOther}>
+            <input
+              autoFocus
+              maxLength={60}
+              placeholder="Qual palavra você usa?"
+              value={otherText}
+              onChange={(e) => setOtherText(e.target.value)}
+            />
+            <button className="btn btn--primary" disabled={!otherText.trim()}>
+              OK
+            </button>
+          </form>
+        ) : (
+          <button
+            className={current?.kind === "other" ? "option option--ghost option--selected" : "option option--ghost"}
+            onClick={() => {
+              setOtherText(current?.kind === "other" ? (current.text ?? "") : "");
+              setOtherOpen(true);
+            }}
+          >
+            Uso outra palavra
+          </button>
+        )}
         <button
           className={current?.kind === "skip" ? "option option--ghost option--selected" : "option option--ghost"}
           onClick={() => answer({ questionId: q.id, kind: "skip" })}
@@ -85,7 +120,14 @@ export function Quiz({ size, counts, onFinish }: Props) {
       </div>
 
       <nav className="quiz__nav">
-        <button className="link" onClick={() => setIndex(index - 1)} disabled={index === 0}>
+        <button
+          className="link"
+          onClick={() => {
+            setOtherOpen(false);
+            setIndex(index - 1);
+          }}
+          disabled={index === 0}
+        >
           ← Voltar
         </button>
       </nav>

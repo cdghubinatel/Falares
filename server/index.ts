@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { readFileSync, existsSync, mkdirSync, createReadStream, statSync } from "node:fs";
 import { join, extname, normalize } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { QUESTION_BY_ID } from "../src/data/questions.ts";
+import { QUESTION_BY_ID, matchVariant } from "../src/data/questions.ts";
 import { REGIONS, UF_BY_SIGLA } from "../src/data/geo.ts";
 import { AGE_BANDS, type Answer, type Counts, type Stats, type Submission } from "../src/lib/types.ts";
 
@@ -81,6 +81,11 @@ function cleanAnswer(raw: unknown): Answer | null {
     case "term":
       if (typeof a.term !== "string" || !q.variants.some((v) => v.term === a.term)) return null;
       return { questionId: q.id, kind: "term", term: a.term };
+    case "other": {
+      const text = typeof a.text === "string" ? a.text.trim().slice(0, 60) : "";
+      if (!text) return null;
+      return { questionId: q.id, kind: "other", text, term: matchVariant(q, text) ?? undefined };
+    }
     case "skip":
       return { questionId: q.id, kind: "skip" };
     default:
@@ -122,7 +127,7 @@ function saveSubmission(body: Submission) {
       hit ? 1 : 0,
       body.feedback,
     );
-    for (const a of answers) insertAnswer.run(lastInsertRowid, a.questionId, a.kind, a.term ?? null, null);
+    for (const a of answers) insertAnswer.run(lastInsertRowid, a.questionId, a.kind, a.term ?? null, a.text ?? null);
     db.exec("COMMIT");
   } catch (e) {
     db.exec("ROLLBACK");

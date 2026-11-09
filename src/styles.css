@@ -281,7 +281,7 @@ h2 {
 
 .options--fixed {
   margin-top: 10px;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
 }
 
 .option {
@@ -661,6 +661,10 @@ select:focus {
 
   .options:not(.options--fixed) {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .options--fixed {
+    grid-template-columns: 1fr;
   }
 
   .prompt {

@@ -21,7 +21,7 @@ const SEED_COMMON_SHARE = 0.55;
 
 /** Prior: chance de alguém ter crescido em cada UF, pela população (achatada). */
 const PRIOR: Record<string, number> = (() => {
-  const w = UFS.map((u) => Math.pow(u.pop, 0.7));
+  const w = UFS.map((u) => Math.pow(u.pop, 0.4));
   const z = w.reduce((a, b) => a + b, 0);
   return Object.fromEntries(UFS.map((u, i) => [u.sigla, w[i] / z]));
 })();
@@ -66,9 +66,12 @@ export function termShare(questionId: string, term: string, uf: string, counts: 
   return (n + SEED_STRENGTH * seed) / (total + SEED_STRENGTH);
 }
 
-/** Respostas que entram no cálculo (as não respondidas ficam de fora). */
+/**
+ * Respostas que entram no cálculo: as variantes conhecidas, inclusive quando
+ * digitadas em "Uso outra palavra". Palavras novas ainda não têm dados.
+ */
 export function informativeAnswers(answers: Answer[]): Answer[] {
-  return answers.filter((a) => a.kind === "term" && a.term);
+  return answers.filter((a) => a.kind !== "skip" && a.term);
 }
 
 /** Distribuição de probabilidade sobre as UFs dadas as respostas. */
