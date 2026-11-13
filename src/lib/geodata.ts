@@ -9,11 +9,11 @@ let ufPromise: Promise<UfFeatures> | undefined;
 let muniPromise: Promise<Municipio[]> | undefined;
 
 export function loadUfs(): Promise<UfFeatures> {
-  return (ufPromise ??= fetch("/data/uf.geojson").then((r) => r.json()));
+  return (ufPromise ??= fetch(`${import.meta.env.BASE_URL}data/uf.geojson`).then((r) => r.json()));
 }
 
 export function loadMunicipios(): Promise<Municipio[]> {
-  return (muniPromise ??= fetch("/data/municipios.json").then((r) => r.json()));
+  return (muniPromise ??= fetch(`${import.meta.env.BASE_URL}data/municipios.json`).then((r) => r.json()));
 }
 
 /** Distância (km) de um ponto até a borda mais próxima de um conjunto de UFs. */

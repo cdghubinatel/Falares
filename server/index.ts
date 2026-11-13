@@ -9,6 +9,8 @@ import { AGE_BANDS, type Answer, type Counts, type Stats, type Submission } from
 const ROOT = new URL("..", import.meta.url).pathname;
 const PORT = Number(process.env.PORT ?? 3001);
 const PROD = process.env.NODE_ENV === "production";
+/** Domínio do site quando ele está hospedado à parte (ex.: https://cdghubinatel.github.io). */
+const CORS_ORIGIN = process.env.CORS_ORIGIN;
 
 // Municípios: código IBGE → UF
 const municipios = new Map<number, string>(
@@ -181,6 +183,12 @@ function serveStatic(req: IncomingMessage, res: ServerResponse) {
 }
 
 createServer(async (req, res) => {
+  if (CORS_ORIGIN) {
+    res.setHeader("access-control-allow-origin", CORS_ORIGIN);
+    res.setHeader("access-control-allow-methods", "GET, POST");
+    res.setHeader("access-control-allow-headers", "content-type");
+    if (req.method === "OPTIONS") return res.writeHead(204).end();
+  }
   try {
     if (req.url === "/api/stats" && req.method === "GET") return send(res, 200, getStats());
     if (req.url === "/api/submissions" && req.method === "POST") {

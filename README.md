@@ -30,6 +30,15 @@ npm run build
 npm start
 ```
 
+## Publicação no GitHub Pages
+
+Cada push na `main` publica o site em https://cdghubinatel.github.io/Falares/ (workflow em `.github/workflows/deploy.yml`). Na primeira vez, ative em **Settings → Pages → Source: GitHub Actions**.
+
+O GitHub Pages não roda a API. Sem ela, o jogo funciona inteiro, mas a validação só mostra o resultado, sem salvar. Para salvar as respostas:
+
+1. Hospede a API num serviço com Node e disco persistente, com `npm start` e as variáveis `CORS_ORIGIN=https://cdghubinatel.github.io` e, se quiser, `DB_PATH` apontando para o disco.
+2. No GitHub, em **Settings → Secrets and variables → Actions → Variables**, crie `API_URL` com o endereço da API (ex.: `https://falares-api.onrender.com`) e rode o workflow de novo.
+
 ## Tecnologias
 
 React, TypeScript e Vite no site; Node com SQLite (`node:sqlite`) na API; mapa desenhado com d3-geo a partir da malha do IBGE.

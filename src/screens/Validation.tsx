@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MunicipioInput } from "../components/MunicipioInput.tsx";
-import { submit } from "../lib/api.ts";
+import { CAN_SAVE, submit } from "../lib/api.ts";
 import type { Municipio } from "../lib/geodata.ts";
 import { AGE_BANDS, type AgeBand, type Answer, type Feedback, type Guess, type Stats } from "../lib/types.ts";
 
@@ -8,7 +8,8 @@ interface Props {
   answers: Answer[];
   guess: Guess;
   where: string;
-  onDone: (result: { childhood: Municipio; feedback: Feedback; stats: Stats }) => void;
+  /** `stats` vem atualizado da API; sem API, fica de fora. */
+  onDone: (result: { childhood: Municipio; feedback: Feedback; stats?: Stats }) => void;
 }
 
 const FEEDBACK: { value: Feedback; label: string }[] = [
@@ -29,6 +30,7 @@ export function Validation({ answers, guess, where, onDone }: Props) {
   async function send(e: React.FormEvent) {
     e.preventDefault();
     if (!feedback || !childhood) return;
+    if (!CAN_SAVE) return onDone({ childhood, feedback });
     setStatus("sending");
     try {
       const { stats } = await submit({
@@ -94,15 +96,24 @@ export function Validation({ answers, guess, where, onDone }: Props) {
         </div>
 
         <aside className="privacy">
-          <strong>Privacidade.</strong> Guardamos apenas os municípios e a faixa etária que você informar, junto com
+          {CAN_SAVE ? (
+            <>
+              <strong>Privacidade.</strong> Guardamos apenas os municípios e a faixa etária que você informar, junto com
           suas respostas. Nada de nome, e-mail, IP ou localização exata. Só a partir daqui suas respostas passam a contar
           nos mapas; se você não enviar, nada é salvo.
+            </>
+          ) : (
+            <>
+              <strong>Privacidade.</strong> Nesta versão nada é enviado nem salvo: o resultado é calculado no seu
+              navegador.
+            </>
+          )}
         </aside>
 
         {typeof status === "object" && <p className="error">{status.error}</p>}
 
         <button className="btn btn--primary btn--block" disabled={!ready}>
-          {status === "sending" ? "Enviando…" : "Enviar e ver se acertou"}
+          {status === "sending" ? "Enviando…" : CAN_SAVE ? "Enviar e ver se acertou" : "Ver se acertou"}
         </button>
       </form>
     </section>

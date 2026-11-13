@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BrazilMap } from "../components/BrazilMap.tsx";
 import { UFS, UF_BY_SIGLA, emUF } from "../data/geo.ts";
 import { distanceToUfs, loadUfs, type Municipio } from "../lib/geodata.ts";
+import { CAN_SAVE } from "../lib/api.ts";
 import type { Estimate } from "../lib/model.ts";
 import type { Stats } from "../lib/types.ts";
 
@@ -51,23 +52,25 @@ export function Done({ estimate, childhood, stats, onRestart }: Props) {
         {rank === 1
           ? `${UF_BY_SIGLA.get(uf)!.nome} era o nosso palpite número 1.`
           : `${UF_BY_SIGLA.get(uf)!.nome} era o nosso ${rank}º palpite entre os 27 estados.`}{" "}
-        Obrigado! Suas respostas agora fazem parte dos mapas.
+        {CAN_SAVE && "Obrigado! Suas respostas agora fazem parte dos mapas."}
       </p>
 
       <BrazilMap values={byUf} highlight={[uf]} marker={{ lat, lon }} />
 
-      <div className="stats card">
-        <div>
-          <span className="stats__num">{stats.validated.toLocaleString("pt-BR")}</span>
-          <span className="stats__label">respostas validadas até agora</span>
-        </div>
-        {accuracy != null && (
+      {CAN_SAVE && (
+        <div className="stats card">
           <div>
-            <span className="stats__num">{accuracy}%</span>
-            <span className="stats__label">de acertos do Falares</span>
+            <span className="stats__num">{stats.validated.toLocaleString("pt-BR")}</span>
+            <span className="stats__label">respostas validadas até agora</span>
           </div>
-        )}
-      </div>
+          {accuracy != null && (
+            <div>
+              <span className="stats__num">{accuracy}%</span>
+              <span className="stats__label">de acertos do Falares</span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="cta card">
         <div>

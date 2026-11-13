@@ -62,7 +62,7 @@ export function App() {
             guess={screen.estimate.guess}
             where={screen.estimate.where}
             onDone={({ childhood, stats }) => {
-              setStats(stats);
+              if (stats) setStats(stats);
               setScreen({ name: "done", estimate: screen.estimate, childhood });
             }}
           />
